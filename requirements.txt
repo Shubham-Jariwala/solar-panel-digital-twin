@@ -1,0 +1,5 @@
+pandas
+matplotlib
+Flask
+dash
+numpy

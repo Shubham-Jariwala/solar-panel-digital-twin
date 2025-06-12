@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Solar Panel Digital Twin</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script type="module" src="https://unpkg.com/three@0.155.0/build/three.module.js"></script>
+  <script type="module" src="https://unpkg.com/three@0.155.0/examples/jsm/loaders/GLTFLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    h1 {
+      text-align: center;
+      font-size: 2.3rem;
+      font-weight: 800;
+      color: #2c3e50;
+      margin-top: 32px;
+      margin-bottom: 18px;
+      letter-spacing: 0.01em;
+      text-shadow: 0 2px 8px rgba(44,62,80,0.08);
+    }
+    .container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      margin: 0 auto;
+      gap: 36px;
+      max-width: 1300px;
+      width: 100vw;
+      min-width: 900px;
+      padding-bottom: 32px;
+    }
+    .left-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1.5;
+      min-width: 480px;
+      max-width: 700px;
+    }
+    #viewer {
+      width: 440px !important;
+      height: 260px !important;
+      min-width: 320px;
+      min-height: 180px;
+      max-width: 520px;
+      max-height: 320px;
+      background: #eaf6fb;
+      border: 3px solid #1abc9c;
+      border-radius: 20px;
+      box-shadow: 0 4px 24px rgba(44,62,80,0.10);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      transition: box-shadow 0.2s;
+    }
+    .charts-row {
+      display: flex;
+      flex-direction: row;
+      gap: 32px;
+      width: 100%;
+      justify-content: center;
+      margin-top: 0;
+    }
+    .chart-block {
+      background: #f8f8f8;
+      border-radius: 18px;
+      box-shadow: 0 2px 12px rgba(44,62,80,0.10);
+      padding: 18px 12px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      min-width: 260px;
+      max-width: 340px;
+      height: 220px;
+    }
+    .chart-block canvas {
+      width: 100% !important;
+      height: 180px !important;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+    }
+    .data-panel {
+      flex: 1;
+      background: #fff;
+      padding: 32px 24px 24px 24px;
+      border-radius: 22px;
+      box-shadow: 0 4px 32px rgba(44,62,80,0.13);
+      min-width: 300px;
+      max-width: 370px;
+      min-height: 420px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+      gap: 0;
+    }
+    .data-panel p {
+      font-size: 18px;
+      margin: 10px 0 0 0;
+      color: #2c3e50;
+      line-height: 1.2;
+      display: flex;
+      flex-direction: row;
+      align-items: baseline;
+      gap: 8px;
+    }
+    .metric-label {
+      color: #888;
+      font-size: 15px;
+      font-weight: 500;
+      min-width: 120px;
+      display: inline-block;
+      margin-right: 8px;
+    }
+    .metric-value {
+      font-size: 22px;
+      font-weight: bold;
+      color: #1abc9c;
+      letter-spacing: 0.01em;
+      min-width: 60px;
+      display: inline-block;
+    }
+    .dashboard-metrics {
+      margin-top: 24px;
+      background: #f8f8f8;
+      border-radius: 16px;
+      padding: 16px 10px;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.04);
+      width: 100%;
+    }
+    .dashboard-metrics p {
+      margin: 8px 0;
+      font-size: 16px;
+      color: #34495e;
+      display: flex;
+      flex-direction: row;
+      align-items: baseline;
+      gap: 8px;
+    }
+    @media (max-width: 1100px) {
+      .container { min-width: 0; max-width: 98vw; gap: 18px; }
+      .left-panel { min-width: 0; max-width: 98vw; }
+      #viewer { width: 320px !important; height: 180px !important; }
+      .chart-block { min-width: 120px; max-width: 180px; height: 120px; }
+      .data-panel { min-width: 180px; max-width: 240px; padding: 14px 8px; }
+    }
+    /* Remove old charts-section styles */
+    .charts-section, .charts-section canvas { all: unset; }
+  </style>
+</head>
+<body>
+  <h1>☀️ Solar Panel Digital Twin Dashboard</h1>
+  <div class="container">
+    <div class="left-panel">
+      <div id="viewer"></div>
+      <div class="charts-row">
+        <div class="chart-block">
+          <canvas id="powerChart" height="140"></canvas>
+        </div>
+        <div class="chart-block">
+          <canvas id="tempEffChart" height="140"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="data-panel">
+      <p><span class="metric-label">Voltage</span><br><span class="metric-value" id="voltage">--</span> V</p>
+      <p><span class="metric-label">Current</span><br><span class="metric-value" id="current">--</span> A</p>
+      <p><span class="metric-label">Power</span><br><span class="metric-value" id="power">--</span> W</p>
+      <p><span class="metric-label">Temperature</span><br><span class="metric-value" id="temperature">--</span> °C</p>
+      <p><span class="metric-label">Last Updated</span><br><span class="metric-value" id="timestamp">--</span></p>
+      <div class="dashboard-metrics">
+        <p><span class="metric-label">Panel Efficiency</span><br><span class="metric-value" id="efficiency">--</span> %</p>
+        <p><span class="metric-label">Sunlight Intensity</span><br><span class="metric-value" id="sunlight">--</span> lux</p>
+        <p><span class="metric-label">Panel Angle</span><br><span class="metric-value" id="panel-angle">--</span> °</p>
+        <p><span class="metric-label">System Status</span><br><span class="metric-value" id="status">--</span></p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.155.0/build/three.module.js?module';
+    import { OrbitControls } from 'https://unpkg.com/three@0.155.0/examples/jsm/controls/OrbitControls.js?module';
+    // Set up scene, camera, and renderer
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    // Enlarge the animation area
+    const width = 700;
+    const height = 500;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height);
+    const viewer = document.getElementById("viewer");
+    viewer.style.width = width + 'px';
+    viewer.style.height = height + 'px';
+    renderer.domElement.style.border = 'none';
+    viewer.style.border = 'none';
+    viewer.appendChild(renderer.domElement);
+    // Controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.enablePan = true;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.5;
+    camera.position.set(0, 1, 5);
+    camera.lookAt(0, 0, 0);
+    controls.update();
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(5, 10, 7.5);
+    scene.add(directionalLight);
+    // Create a simple solar panel using box and plane geometries
+    // Panel base
+    const panelGeometry = new THREE.BoxGeometry(3, 0.1, 2);
+    const panelMaterial = new THREE.MeshPhongMaterial({ color: 0x2980b9, shininess: 80 });
+    const panel = new THREE.Mesh(panelGeometry, panelMaterial);
+    panel.position.y = 0.2;
+    scene.add(panel);
+    // Panel frame
+    const frameGeometry = new THREE.BoxGeometry(3.1, 0.12, 2.1);
+    const frameMaterial = new THREE.MeshPhongMaterial({ color: 0x222222 });
+    const frame = new THREE.Mesh(frameGeometry, frameMaterial);
+    frame.position.y = 0.13;
+    scene.add(frame);
+    // Stand
+    const standGeometry = new THREE.CylinderGeometry(0.07, 0.07, 1.2, 16);
+    const standMaterial = new THREE.MeshPhongMaterial({ color: 0x888888 });
+    const stand = new THREE.Mesh(standGeometry, standMaterial);
+    stand.position.y = -0.5;
+    scene.add(stand);
+    // Animate the panel to tilt up and down (simulate sun tracking)
+    let tiltDirection = 1;
+    let angleDeg = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      // Animate tilt
+      panel.rotation.x += 0.003 * tiltDirection;
+      frame.rotation.x += 0.003 * tiltDirection;
+      angleDeg = (panel.rotation.x * 180 / Math.PI).toFixed(1);
+      if (panel.rotation.x > 0.4 || panel.rotation.x < -0.2) {
+        tiltDirection *= -1;
+      }
+      // Simulate metrics
+      document.getElementById("efficiency").textContent = (95 - Math.abs(angleDeg - 15)).toFixed(1);
+      document.getElementById("sunlight").textContent = (90000 - Math.abs(angleDeg - 15) * 100).toFixed(0);
+      document.getElementById("panel-angle").textContent = angleDeg;
+      document.getElementById("status").textContent = (Math.abs(angleDeg) < 20 ? 'Optimal' : 'Tracking');
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+    // Chart.js setup
+    const powerCtx = document.getElementById('powerChart').getContext('2d');
+    const tempEffCtx = document.getElementById('tempEffChart').getContext('2d');
+    // Data buffers
+    const powerData = { labels: [], data: [] };
+    const tempEffData = { temp: [], eff: [] };
+    // Power Output Over Time Chart
+    const powerChart = new Chart(powerCtx, {
+      type: 'line',
+      data: {
+        labels: powerData.labels,
+        datasets: [{
+          label: 'Power Output (W)',
+          data: powerData.data,
+          borderColor: '#1abc9c',
+          backgroundColor: 'rgba(26,188,156,0.08)',
+          tension: 0.3,
+          pointRadius: 0,
+          fill: true,
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { display: false },
+          y: { beginAtZero: true, grid: { color: '#eee' } }
+        },
+        animation: false,
+        responsive: true,
+        maintainAspectRatio: false,
+      }
+    });
+    // Temperature vs Efficiency Chart
+    const tempEffChart = new Chart(tempEffCtx, {
+      type: 'line',
+      data: {
+        labels: tempEffData.temp,
+        datasets: [{
+          label: 'Efficiency (%)',
+          data: tempEffData.eff,
+          borderColor: '#2980b9',
+          backgroundColor: 'rgba(41,128,185,0.08)',
+          tension: 0.3,
+          pointRadius: 0,
+          fill: true,
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          x: {
+            title: { display: true, text: 'Temperature (°C)' },
+            grid: { color: '#eee' }
+          },
+          y: {
+            title: { display: true, text: 'Efficiency (%)' },
+            beginAtZero: true,
+            grid: { color: '#eee' }
+          }
+        },
+        animation: false,
+        responsive: true,
+        maintainAspectRatio: false,
+      }
+    });
+    // Fetch and update data
+    async function fetchData() {
+      const res = await fetch('/data');
+      const data = await res.json();
+      document.getElementById("voltage").textContent = data.voltage;
+      document.getElementById("current").textContent = data.current;
+      document.getElementById("power").textContent = data.power;
+      document.getElementById("temperature").textContent = data.temperature;
+      document.getElementById("timestamp").textContent = data.timestamp;
+      // Update charts
+      const now = new Date();
+      const timeLabel = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0') + ':' + now.getSeconds().toString().padStart(2, '0');
+      // Power chart
+      if (powerData.labels.length > 30) { powerData.labels.shift(); powerData.data.shift(); }
+      powerData.labels.push(timeLabel);
+      powerData.data.push(data.power);
+      powerChart.update();
+      // Temp vs Eff chart
+      const eff = parseFloat(document.getElementById("efficiency").textContent);
+      if (tempEffData.temp.length > 30) { tempEffData.temp.shift(); tempEffData.eff.shift(); }
+      tempEffData.temp.push(data.temperature);
+      tempEffData.eff.push(eff);
+      tempEffChart.update();
+    }
+    setInterval(fetchData, 2000);
+    fetchData();
+  </script>
+</body>
+</html>
