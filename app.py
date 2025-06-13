@@ -16,6 +16,7 @@ def data():
         "current": round(random.uniform(4.0, 6.0), 2),
         "power": lambda v, i: round(v * i, 2),
         "temperature": round(random.uniform(30.0, 50.0), 2),
+        "sunlight": round(random.uniform(80000, 100000), 0),
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
     }
     data["power"] = data["power"](data["voltage"], data["current"])

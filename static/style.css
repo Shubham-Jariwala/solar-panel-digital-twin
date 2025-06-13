@@ -12,23 +12,39 @@ h1 {
 
 .container {
   display: flex;
-  justify-content: space-around;
-  align-items: start;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 30px;
   margin-top: 30px;
+  max-width: 1200px;
+  width: 95vw;
 }
 
 #viewer {
+  width: 520px;
+  height: 292px;
+  aspect-ratio: 16 / 9;
   border: 2px solid #ccc;
-  border-radius: 10px;
+  border-radius: 12px;
   overflow: hidden;
+  background: #fff;
+  flex-shrink: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .data-panel {
   background: #fff;
   padding: 20px;
-  border-radius: 10px;
+  border-radius: 12px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  min-width: 250px;
+  width: 280px;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 0;
 }
 
 .data-panel p {
@@ -41,9 +57,116 @@ button {
   color: white;
   border: none;
   border-radius: 6px;
+  padding: 10px 16px;
+  cursor: pointer;
   transition: 0.3s ease;
 }
 
 button:hover {
   background-color: #1abc9c;
+}
+
+/* --- Chart Section Improvements --- */
+.charts-row {
+  display: flex;
+  flex-direction: row;
+  gap: 18px;
+  width: 100%;
+  justify-content: flex-start;
+  margin-top: 24px;
+  margin-left: 0;
+  margin-right: 90px;
+}
+.chart-block {
+  background: #f8f8f8;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+  padding: 8px 4px 4px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex: 1 1 320px;
+  min-width: 260px;
+  max-width: 380px;
+  height: 170px;
+  margin-left: 0;
+}
+.chart-block canvas {
+  width: 100% !important;
+  height: 270px !important;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+  margin-left: 0;
+}
+
+/* --- Viewer and Data Panel Alignment --- */
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 30px;
+  margin-top: 30px;
+  max-width: 1200px;
+  width: 95vw;
+}
+
+#viewer {
+  width: 520px;
+  height: 292px;
+  aspect-ratio: 16 / 9;
+  border: 2px solid #ccc;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  flex-shrink: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.data-panel {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  width: 280px;
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 0;
+}
+
+@media (max-width: 1100px) {
+  .container {
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    min-width: 0;
+    max-width: 98vw;
+  }
+  #viewer {
+    width: 90vw;
+    max-width: 98vw;
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+  .data-panel {
+    width: 90vw;
+    max-width: 98vw;
+    margin-top: 20px;
+    align-self: center;
+  }
+  .charts-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .chart-block, .chart-block canvas {
+    width: 90vw !important;
+    max-width: 98vw !important;
+    min-width: 0;
+    height: 120px !important;
+  }
 }

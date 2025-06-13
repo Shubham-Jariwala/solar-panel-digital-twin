@@ -21,8 +21,8 @@
       font-size: 2.3rem;
       font-weight: 800;
       color: #2c3e50;
-      margin-top: 32px;
-      margin-bottom: 18px;
+      margin-top: 16px;
+      margin-bottom: 16px;
       letter-spacing: 0.01em;
       text-shadow: 0 2px 8px rgba(44,62,80,0.08);
     }
@@ -43,15 +43,15 @@
       align-items: center;
       flex: 1.5;
       min-width: 480px;
-      max-width: 700px;
+      max-width: 690px;
     }
     #viewer {
       width: 440px !important;
       height: 260px !important;
-      min-width: 320px;
-      min-height: 180px;
-      max-width: 520px;
-      max-height: 320px;
+      min-width: 780px;
+      min-height: 480px;
+      max-width: 700px;
+      max-height: 480px;
       background: #eaf6fb;
       border: 3px solid #1abc9c;
       border-radius: 20px;
@@ -65,10 +65,11 @@
     .charts-row {
       display: flex;
       flex-direction: row;
-      gap: 32px;
+      gap: 39px;
       width: 100%;
-      justify-content: center;
-      margin-top: 0;
+      justify-content: flex-start;
+      margin-top: 10px;
+      margin-left: 0;
     }
     .chart-block {
       background: #f8f8f8;
@@ -79,13 +80,13 @@
       flex-direction: column;
       align-items: center;
       flex: 1;
-      min-width: 260px;
-      max-width: 340px;
-      height: 220px;
+      min-width: 360px;
+      max-width: 420px;
+      height: 270px;
     }
     .chart-block canvas {
       width: 100% !important;
-      height: 180px !important;
+      height: 270px !important;
       background: #fff;
       border-radius: 10px;
       box-shadow: 0 2px 8px rgba(44,62,80,0.08);
@@ -104,6 +105,8 @@
       justify-content: flex-start;
       align-items: flex-start;
       gap: 0;
+      margin-left: 40px;
+      margin-right: -35px;
     }
     .data-panel p {
       font-size: 18px;
@@ -137,7 +140,7 @@
       border-radius: 16px;
       padding: 16px 10px;
       box-shadow: 0 2px 8px rgba(44,62,80,0.04);
-      width: 100%;
+      width: 94%;
     }
     .dashboard-metrics p {
       margin: 8px 0;
@@ -147,6 +150,35 @@
       flex-direction: row;
       align-items: baseline;
       gap: 8px;
+    }
+    .bottom-charts-row {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      gap: 11px;
+      width: 100%;
+      margin-top: 0;
+      margin-bottom: 24px;
+    }
+    .bottom-charts-row .chart-block {
+      background: #f8f8f8;
+      border-radius: 18px;
+      box-shadow: 0 2px 12px rgba(44,62,80,0.10);
+      padding: 18px 12px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      min-width: 360px;
+      max-width: 420px;
+      height: 270px;
+    }
+    .bottom-charts-row .chart-block canvas {
+      width: 100% !important;
+      height: 270px !important;
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.08);
     }
     @media (max-width: 1100px) {
       .container { min-width: 0; max-width: 98vw; gap: 18px; }
@@ -170,6 +202,9 @@
         </div>
         <div class="chart-block">
           <canvas id="tempEffChart" height="140"></canvas>
+        </div>
+        <div class="chart-block">
+          <canvas id="sunlightChart" height="140"></canvas>
         </div>
       </div>
     </div>
@@ -266,9 +301,11 @@
     // Chart.js setup
     const powerCtx = document.getElementById('powerChart').getContext('2d');
     const tempEffCtx = document.getElementById('tempEffChart').getContext('2d');
+    const sunlightCtx = document.getElementById('sunlightChart').getContext('2d');
     // Data buffers
     const powerData = { labels: [], data: [] };
     const tempEffData = { temp: [], eff: [] };
+    const sunlightData = { labels: [], data: [] };
     // Power Output Over Time Chart
     const powerChart = new Chart(powerCtx, {
       type: 'line',
@@ -287,12 +324,23 @@
       options: {
         plugins: { legend: { display: false } },
         scales: {
-          x: { display: false },
-          y: { beginAtZero: true, grid: { color: '#eee' } }
+          x: {
+            display: true,
+            title: { display: true, text: 'Time', color: '#34495e', font: { weight: 'bold', size: 14 } },
+            ticks: { color: '#888', font: { size: 12 }, maxTicksLimit: 6, autoSkip: true },
+            grid: { color: '#eee' }
+          },
+          y: {
+            title: { display: true, text: 'Power (W)', color: '#34495e', font: { weight: 'bold', size: 14 } },
+            beginAtZero: true,
+            grid: { color: '#eee' },
+            ticks: { color: '#888', font: { size: 12 } }
+          }
         },
         animation: false,
         responsive: true,
         maintainAspectRatio: false,
+        layout: { padding: { left: 10, right: 10, top: 10, bottom: 10 } }
       }
     });
     // Temperature vs Efficiency Chart
@@ -314,18 +362,58 @@
         plugins: { legend: { display: false } },
         scales: {
           x: {
-            title: { display: true, text: 'Temperature (°C)' },
+            title: { display: true, text: 'Temperature (°C)', color: '#34495e', font: { weight: 'bold', size: 14 } },
+            ticks: { color: '#888', font: { size: 12 }, maxTicksLimit: 6, autoSkip: true },
             grid: { color: '#eee' }
           },
           y: {
-            title: { display: true, text: 'Efficiency (%)' },
+            title: { display: true, text: 'Efficiency (%)', color: '#34495e', font: { weight: 'bold', size: 14 } },
             beginAtZero: true,
-            grid: { color: '#eee' }
+            grid: { color: '#eee' },
+            ticks: { color: '#888', font: { size: 12 } }
           }
         },
         animation: false,
         responsive: true,
         maintainAspectRatio: false,
+        layout: { padding: { left: 10, right: 10, top: 10, bottom: 10 } }
+      }
+    });
+    // Sunlight Intensity Over Time Chart
+    const sunlightChart = new Chart(sunlightCtx, {
+      type: 'line',
+      data: {
+        labels: sunlightData.labels,
+        datasets: [{
+          label: 'Sunlight Intensity (lux)',
+          data: sunlightData.data,
+          borderColor: '#f39c12',
+          backgroundColor: 'rgba(243, 156, 18, 0.08)',
+          tension: 0.3,
+          pointRadius: 0,
+          fill: true,
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          x: {
+            display: true,
+            title: { display: true, text: 'Time', color: '#34495e', font: { weight: 'bold', size: 14 } },
+            ticks: { color: '#888', font: { size: 12 }, maxTicksLimit: 6, autoSkip: true },
+            grid: { color: '#eee' }
+          },
+          y: {
+            title: { display: true, text: 'Sunlight (lux)', color: '#34495e', font: { weight: 'bold', size: 14 } },
+            beginAtZero: true,
+            grid: { color: '#eee' },
+            ticks: { color: '#888', font: { size: 12 } }
+          }
+        },
+        animation: false,
+        responsive: true,
+        maintainAspectRatio: false,
+        layout: { padding: { left: 10, right: 10, top: 10, bottom: 10 } }
       }
     });
     // Fetch and update data
@@ -351,6 +439,13 @@
       tempEffData.temp.push(data.temperature);
       tempEffData.eff.push(eff);
       tempEffChart.update();
+      // Sunlight chart
+      if (data.sunlight !== undefined && data.sunlight !== null && !isNaN(Number(data.sunlight))) {
+        if (sunlightData.labels.length > 30) { sunlightData.labels.shift(); sunlightData.data.shift(); }
+        sunlightData.labels.push(timeLabel);
+        sunlightData.data.push(Number(data.sunlight));
+        sunlightChart.update();
+      }
     }
     setInterval(fetchData, 2000);
     fetchData();
