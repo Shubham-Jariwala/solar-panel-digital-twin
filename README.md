@@ -25,7 +25,7 @@ solar-panel-digital-twin
 
 1. Clone the repository:
    ```
-   git clone <repository-url>
+   git clone https://github.com/Shubham-Jariwala/solar-panel-digital-twin.git
    cd solar-panel-digital-twin
    ```
 
@@ -50,6 +50,11 @@ To view the dashboard, run:
 python src/dashboard/app.py
 ```
 Then open your web browser and navigate to `http://localhost:5000` (or the specified port).
+
+### Implementation
+
+![GIF-2025-06-13-13-26-56](https://github.com/user-attachments/assets/cfce0203-2fed-4eab-919e-4310bda59ffb)
+
 
 ## Features
 
