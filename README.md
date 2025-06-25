@@ -53,8 +53,9 @@ Then open your web browser and navigate to `http://localhost:5000` (or the speci
 
 ### Implementation
 
-![GIF-2025-06-13-13-26-56](https://github.com/user-attachments/assets/cfce0203-2fed-4eab-919e-4310bda59ffb)
-
+<p align="center">
+  <img src="![GIF-2025-06-13-13-26-56](https://github.com/user-attachments/assets/cfce0203-2fed-4eab-919e-4310bda59ffb)" width="600" />
+</p>
 
 ## Features
 
